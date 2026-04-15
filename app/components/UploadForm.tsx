@@ -4,7 +4,7 @@ import { useState, useRef, SubmitEvent } from 'react'
 
 type Status = 'idle' | 'uploading' | 'success' | 'error'
 
-export default function UploadForm() {
+export default function UploadForm({ onSuccess }: { onSuccess?: () => void }) {
   const [file, setFile] = useState<File | null>(null)
   const [status, setStatus] = useState<Status>('idle')
   const [message, setMessage] = useState('')
@@ -32,6 +32,7 @@ export default function UploadForm() {
         setMessage(`Indexed ${data.chunks} chunk${data.chunks === 1 ? '' : 's'}`)
         setFile(null)
         if (inputRef.current) inputRef.current.value = ''
+        onSuccess?.()
       }
     } catch {
       setStatus('error')
