@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@ai-sdk/anthropic": "^3.0.69",
+    "@ai-sdk/react": "^3.0.162",
     "ai": "^6.0.159",
     "next": "16.2.3",
     "pdf-parse": "^2.4.5",

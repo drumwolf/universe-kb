@@ -1,4 +1,5 @@
 import UploadForm from '@/app/components/UploadForm'
+import ChatPanel from '@/app/components/ChatPanel'
 
 export default function Home() {
   return (
@@ -18,8 +19,8 @@ export default function Home() {
       </aside>
 
       {/* Right panel — chat */}
-      <main className="flex flex-1 items-center justify-center text-zinc-600 text-sm">
-        Chat coming in Step 7
+      <main className="flex flex-1 flex-col overflow-hidden">
+        <ChatPanel />
       </main>
     </div>
   )
