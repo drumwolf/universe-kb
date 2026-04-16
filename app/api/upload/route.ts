@@ -7,6 +7,13 @@ const ALLOWED_TYPES: Record<string, string> = {
   'application/pdf': 'pdf',
   'text/plain': 'txt',
   'text/markdown': 'md',
+  'text/x-markdown': 'md',
+}
+
+const ALLOWED_EXTENSIONS: Record<string, string> = {
+  '.pdf': 'pdf',
+  '.txt': 'txt',
+  '.md': 'md',
 }
 
 export async function POST(request: Request) {
@@ -17,7 +24,8 @@ export async function POST(request: Request) {
     return Response.json({ error: 'No file provided' }, { status: 400 })
   }
 
-  const type = ALLOWED_TYPES[file.type]
+  const ext = '.' + file.name.split('.').pop()?.toLowerCase()
+  const type = ALLOWED_TYPES[file.type] ?? ALLOWED_EXTENSIONS[ext]
   if (!type) {
     return Response.json({ error: 'Unsupported file type' }, { status: 400 })
   }
