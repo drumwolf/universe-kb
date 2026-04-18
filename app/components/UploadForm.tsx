@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useRef, SubmitEvent } from 'react'
+import { SubmitEvent, useRef, useState } from 'react'
 
 type Status = 'idle' | 'uploading' | 'success' | 'error'
 
@@ -43,7 +43,7 @@ export default function UploadForm({ onSuccess }: { onSuccess?: () => void }) {
   return (
     <form onSubmit={handleSubmit} className="flex flex-col gap-3">
       <label className="flex flex-col gap-1.5">
-        <span className="text-xs text-zinc-400">File (.pdf, .txt, .md)</span>
+        <span className="text-xs text-zinc-500">File (.pdf, .txt, .md)</span>
         <input
           ref={inputRef}
           type="file"
@@ -53,7 +53,7 @@ export default function UploadForm({ onSuccess }: { onSuccess?: () => void }) {
             setStatus('idle')
             setMessage('')
           }}
-          className="text-sm text-zinc-300 file:mr-3 file:rounded file:border-0 file:bg-zinc-700 file:px-3 file:py-1.5 file:text-xs file:font-medium file:text-zinc-200 file:cursor-pointer hover:file:bg-zinc-600"
+          className="text-sm text-zinc-600 file:mr-3 file:rounded file:border-0 file:bg-zinc-700 file:px-3 file:py-1.5 file:text-xs file:font-medium file:text-zinc-200 file:cursor-pointer hover:file:bg-zinc-600"
         />
       </label>
 
