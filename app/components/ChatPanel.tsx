@@ -1,8 +1,9 @@
 'use client'
 
-import { useChat } from '@ai-sdk/react'
 import { DefaultChatTransport, isTextUIPart } from 'ai'
 import { useEffect, useRef, useState } from 'react'
+
+import { useChat } from '@ai-sdk/react'
 
 export default function ChatPanel() {
   const { messages, sendMessage, status } = useChat({
