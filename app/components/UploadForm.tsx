@@ -60,7 +60,7 @@ export default function UploadForm({ onSuccess }: { onSuccess?: () => void }) {
       <button
         type="submit"
         disabled={!file || status === 'uploading'}
-        className="rounded bg-zinc-700 px-3 py-1.5 text-sm font-medium text-zinc-100 transition-colors hover:bg-zinc-600 disabled:cursor-not-allowed disabled:opacity-40"
+        className="cursor-pointer rounded bg-zinc-700 px-3 py-1.5 text-sm font-medium text-zinc-100 transition-colors hover:bg-zinc-600 disabled:cursor-not-allowed disabled:opacity-40"
       >
         {status === 'uploading' ? 'Uploading…' : 'Upload'}
       </button>
