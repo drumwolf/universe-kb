@@ -73,7 +73,7 @@ export default function ChatPanel() {
           onChange={e => setInput(e.target.value)}
           disabled={status !== 'ready'}
           placeholder="Ask about your documents…"
-          className="flex-1 rounded bg-zinc-800 px-3 py-2 text-sm text-zinc-100 placeholder-zinc-500 outline-none focus:ring-1 focus:ring-zinc-600 disabled:opacity-40"
+          className="flex-1 rounded bg-zinc-200 px-3 py-2 text-sm text-zinc-800 placeholder-zinc-500 outline-none focus:ring-1 focus:ring-zinc-600 disabled:opacity-40"
         />
         <button
           type="submit"
