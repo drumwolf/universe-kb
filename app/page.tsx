@@ -1,9 +1,9 @@
-import Sidebar from '@/app/components/Sidebar'
 import ChatPanel from '@/app/components/ChatPanel'
+import Sidebar from '@/app/components/Sidebar'
 
 export default function Home() {
   return (
-    <div className="flex h-screen bg-zinc-950 text-zinc-100">
+    <div className="flex h-screen">
       <Sidebar />
 
       {/* Right panel — chat */}

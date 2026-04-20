@@ -1,8 +1,9 @@
 'use client'
 
-import { useChat } from '@ai-sdk/react'
 import { DefaultChatTransport, isTextUIPart } from 'ai'
 import { useEffect, useRef, useState } from 'react'
+
+import { useChat } from '@ai-sdk/react'
 
 export default function ChatPanel() {
   const { messages, sendMessage, status } = useChat({
@@ -20,7 +21,7 @@ export default function ChatPanel() {
       {/* Messages */}
       <div className="flex-1 overflow-y-auto p-4 space-y-4">
         {messages.length === 0 && (
-          <p className="mt-8 text-center text-sm text-zinc-600">
+          <p className="mt-8 text-center text-sm">
             Upload a document, then ask a question.
           </p>
         )}
@@ -72,12 +73,12 @@ export default function ChatPanel() {
           onChange={e => setInput(e.target.value)}
           disabled={status !== 'ready'}
           placeholder="Ask about your documents…"
-          className="flex-1 rounded bg-zinc-800 px-3 py-2 text-sm text-zinc-100 placeholder-zinc-500 outline-none focus:ring-1 focus:ring-zinc-600 disabled:opacity-40"
+          className="flex-1 rounded bg-zinc-200 px-3 py-2 text-sm text-zinc-800 placeholder-zinc-400 outline-none focus:ring-1 focus:ring-zinc-600 disabled:opacity-40"
         />
         <button
           type="submit"
           disabled={!input.trim() || status !== 'ready'}
-          className="rounded bg-zinc-700 px-4 py-2 text-sm font-medium text-zinc-100 transition-colors hover:bg-zinc-600 disabled:cursor-not-allowed disabled:opacity-40"
+          className="cursor-pointer rounded bg-zinc-700 px-4 py-2 text-sm font-medium text-zinc-100 transition-colors hover:bg-zinc-600 disabled:cursor-not-allowed disabled:opacity-40"
         >
           Send
         </button>

@@ -38,7 +38,7 @@ export default function DocumentList({ refreshKey }: { refreshKey: number }) {
   }
 
   if (docs.length === 0) {
-    return <p className="text-xs text-zinc-600">No documents uploaded yet.</p>
+    return <p className="text-xs">No documents uploaded yet.</p>
   }
 
   return (
@@ -60,7 +60,7 @@ export default function DocumentList({ refreshKey }: { refreshKey: number }) {
             onClick={() => handleDelete(doc.id)}
             disabled={deleting === doc.id}
             aria-label={`Delete ${doc.name}`}
-            className="mt-0.5 shrink-0 text-zinc-600 transition-colors hover:text-red-400 disabled:opacity-40"
+            className="mt-0.5 shrink-0 transition-colors hover:text-red-400 disabled:opacity-40"
           >
             ×
           </button>
