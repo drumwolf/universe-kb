@@ -53,7 +53,7 @@ export default function UploadForm({ onSuccess }: { onSuccess?: () => void }) {
             setStatus('idle')
             setMessage('')
           }}
-          className="text-sm text-zinc-600 file:mr-3 file:rounded file:border-0 file:bg-zinc-700 file:px-3 file:py-1.5 file:text-xs file:font-medium file:text-zinc-200 file:cursor-pointer hover:file:bg-zinc-600"
+          className="text-sm file:mr-3 file:rounded file:border-0 file:bg-zinc-700 file:px-3 file:py-1.5 file:text-xs file:font-medium file:text-zinc-200 file:cursor-pointer hover:file:bg-zinc-600"
         />
       </label>
 
