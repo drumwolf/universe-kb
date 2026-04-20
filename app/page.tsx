@@ -3,7 +3,7 @@ import Sidebar from '@/app/components/Sidebar'
 
 export default function Home() {
   return (
-    <div className="flex h-screen bg-stone-50 text-zinc-100">
+    <div className="flex h-screen">
       <Sidebar />
 
       {/* Right panel — chat */}

@@ -21,7 +21,7 @@ export default function ChatPanel() {
       {/* Messages */}
       <div className="flex-1 overflow-y-auto p-4 space-y-4">
         {messages.length === 0 && (
-          <p className="mt-8 text-center text-sm text-zinc-600">
+          <p className="mt-8 text-center text-sm">
             Upload a document, then ask a question.
           </p>
         )}
