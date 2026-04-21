@@ -7,7 +7,12 @@ import { useChat } from '@ai-sdk/react'
 
 export default function ChatPanel() {
   const { messages, sendMessage, status } = useChat({
-    transport: new DefaultChatTransport({ api: '/api/chat' }),
+    transport: new DefaultChatTransport({
+      api: '/api/chat',
+      prepareSendMessagesRequest: ({ body }) => ({
+        body: { ...body, conversationId: conversationId.current },
+      }),
+    }),
   })
   const [input, setInput] = useState('')
   const bottomRef = useRef<HTMLDivElement>(null)
