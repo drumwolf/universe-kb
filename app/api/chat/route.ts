@@ -12,13 +12,23 @@ const embeddingModel = voyage.textEmbeddingModel('voyage-3')
 const TOP_K = 5
 
 export async function POST(req: Request) {
-  const { messages }: { messages: UIMessage[] } = await req.json()
+  const { messages, conversationId }: { messages: UIMessage[]; conversationId: string } = await req.json()
+
+  const lastUserMessage = messages.findLast(m => m.role === 'user')
 
   const result = streamText({
     model: chatModel,
     system: `You are a lore assistant for a fictional universe. Use the searchLore tool to find relevant information before answering. If the tool returns no results, say you could not find the answer in the documents. Do not draw on general knowledge.`,
     messages: await convertToModelMessages(messages),
     stopWhen: stepCountIs(5),
+    onFinish: async ({ text }) => {
+      if (!conversationId || !lastUserMessage) return
+      const userText = lastUserMessage.parts.find(p => p.type === 'text')?.text ?? ''
+      await pool.query(
+        'INSERT INTO messages (conversation_id, role, content) VALUES ($1, $2, $3), ($1, $4, $5)',
+        [conversationId, 'user', userText, 'assistant', text],
+      )
+    },
     tools: {
       searchLore: tool({
         description: 'Search the lore knowledge base for information relevant to the query.',
