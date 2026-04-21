@@ -11,6 +11,13 @@ export default function ChatPanel() {
   })
   const [input, setInput] = useState('')
   const bottomRef = useRef<HTMLDivElement>(null)
+  const conversationId = useRef<string | null>(null)
+
+  useEffect(() => {
+    fetch('/api/conversations', { method: 'POST' })
+      .then(r => r.json())
+      .then(data => { conversationId.current = data.id })
+  }, [])
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
