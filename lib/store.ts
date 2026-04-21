@@ -6,6 +6,7 @@ export async function storeDocument(
   size: number,
   chunks: string[],
   embeddings: number[][],
+  contentHash: string,
 ): Promise<void> {
   const client = await pool.connect()
 
@@ -13,8 +14,8 @@ export async function storeDocument(
     await client.query('BEGIN')
 
     const { rows } = await client.query<{ id: string }>(
-      'INSERT INTO documents (name, type, size) VALUES ($1, $2, $3) RETURNING id',
-      [name, type, size],
+      'INSERT INTO documents (name, type, size, content_hash) VALUES ($1, $2, $3, $4) RETURNING id',
+      [name, type, size, contentHash],
     )
     const documentId = rows[0].id
 
