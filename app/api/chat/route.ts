@@ -16,7 +16,7 @@ export async function POST(req: Request) {
 
   const result = streamText({
     model: chatModel,
-    system: `You are a lore assistant for a fictional universe called "Old West and Mexico". Use the searchLore tool to find relevant information before answering. If the tool returns no results, say you could not find the answer in the documents. Do not draw on general knowledge.`,
+    system: `You are a lore assistant for a fictional universe. Use the searchLore tool to find relevant information before answering. If the tool returns no results, say you could not find the answer in the documents. Do not draw on general knowledge.`,
     messages: await convertToModelMessages(messages),
     stopWhen: stepCountIs(5),
     tools: {

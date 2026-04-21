@@ -19,12 +19,17 @@ function formatSize(bytes: number): string {
 export default function DocumentList({ refreshKey }: { refreshKey: number }) {
   const [docs, setDocs] = useState<Doc[]>([])
   const [deleting, setDeleting] = useState<string | null>(null)
+  const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
+    setError(null)
     fetch('/api/documents')
-      .then(r => r.json())
+      .then(r => {
+        if (!r.ok) throw new Error(`Failed to load documents (${r.status})`)
+        return r.json()
+      })
       .then(setDocs)
-      .catch(() => {})
+      .catch(e => setError(e.message))
   }, [refreshKey])
 
   async function handleDelete(id: string) {
@@ -35,6 +40,10 @@ export default function DocumentList({ refreshKey }: { refreshKey: number }) {
     } finally {
       setDeleting(null)
     }
+  }
+
+  if (error) {
+    return <p className="text-xs text-red-400">{error}</p>
   }
 
   if (docs.length === 0) {
