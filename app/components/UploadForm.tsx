@@ -2,7 +2,7 @@
 
 import { SubmitEvent, useRef, useState } from 'react'
 
-type Status = 'idle' | 'uploading' | 'success' | 'error'
+type Status = 'idle' | 'uploading' | 'success' | 'duplicate' | 'error'
 
 export default function UploadForm({ onSuccess }: { onSuccess?: () => void }) {
   const [file, setFile] = useState<File | null>(null)
@@ -24,7 +24,10 @@ export default function UploadForm({ onSuccess }: { onSuccess?: () => void }) {
       const res = await fetch('/api/upload', { method: 'POST', body: formData })
       const data = await res.json()
 
-      if (!res.ok) {
+      if (res.status === 409) {
+        setStatus('duplicate')
+        setMessage(data.error ?? 'Duplicate file')
+      } else if (!res.ok) {
         setStatus('error')
         setMessage(data.error ?? 'Upload failed')
       } else {
@@ -67,7 +70,7 @@ export default function UploadForm({ onSuccess }: { onSuccess?: () => void }) {
 
       {message && (
         <p
-          className={`text-xs ${status === 'error' ? 'text-red-400' : 'text-emerald-400'}`}
+          className={`text-xs ${status === 'error' ? 'text-red-400' : status === 'duplicate' ? 'text-amber-400' : 'text-emerald-400'}`}
         >
           {message}
         </p>
