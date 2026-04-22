@@ -6,11 +6,45 @@ import { useEffect, useRef, useState } from 'react'
 import { useChat } from '@ai-sdk/react'
 
 export default function ChatPanel() {
-  const { messages, sendMessage, status } = useChat({
-    transport: new DefaultChatTransport({ api: '/api/chat' }),
+  const { messages, sendMessage, status, setMessages } = useChat({
+    transport: new DefaultChatTransport({
+      api: '/api/chat',
+      prepareSendMessagesRequest: ({ body }) => ({
+        body: { ...body, conversationId: conversationId.current },
+      }),
+    }),
   })
   const [input, setInput] = useState('')
   const bottomRef = useRef<HTMLDivElement>(null)
+  const conversationId = useRef<string | null>(null)
+
+  useEffect(() => {
+    const stored = localStorage.getItem('conversationId')
+
+    const load = (id: string) => {
+      conversationId.current = id
+      fetch(`/api/conversations/${id}/messages`)
+        .then(r => r.json())
+        .then(rows => {
+          setMessages(rows.map((row: { id: string; role: string; content: string }) => ({
+            id: row.id,
+            role: row.role,
+            parts: [{ type: 'text' as const, text: row.content }],
+          })))
+        })
+    }
+
+    if (stored) {
+      load(stored)
+    } else {
+      fetch('/api/conversations', { method: 'POST' })
+        .then(r => r.json())
+        .then(data => {
+          localStorage.setItem('conversationId', data.id)
+          conversationId.current = data.id
+        })
+    }
+  }, [])
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
