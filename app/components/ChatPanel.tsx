@@ -102,12 +102,21 @@ export default function ChatPanel() {
         }}
         className="flex gap-2 border-t border-zinc-800 p-4"
       >
-        <input
+        <textarea
           value={input}
           onChange={e => setInput(e.target.value)}
+          onKeyDown={e => {
+            if (e.key === 'Enter' && !e.shiftKey) {
+              e.preventDefault()
+              if (!input.trim() || status !== 'ready') return
+              sendMessage({ text: input })
+              setInput('')
+            }
+          }}
           disabled={status !== 'ready'}
           placeholder="Ask about your documents…"
-          className="flex-1 rounded bg-zinc-200 px-3 py-2 text-sm text-zinc-800 placeholder-zinc-400 outline-none focus:ring-1 focus:ring-zinc-600 disabled:opacity-40"
+          rows={1}
+          className="flex-1 resize-none rounded bg-zinc-200 px-3 py-2 text-sm text-zinc-800 placeholder-zinc-400 outline-none focus:ring-1 focus:ring-zinc-600 disabled:opacity-40"
         />
         <button
           type="submit"
