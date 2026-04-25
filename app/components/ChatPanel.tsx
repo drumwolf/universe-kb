@@ -9,8 +9,8 @@ export default function ChatPanel() {
   const { messages, sendMessage, status, setMessages } = useChat({
     transport: new DefaultChatTransport({
       api: '/api/chat',
-      prepareSendMessagesRequest: ({ body }) => ({
-        body: { ...body, conversationId: conversationId.current },
+      prepareSendMessagesRequest: ({ messages, body }) => ({
+        body: { ...body, messages, conversationId: conversationId.current },
       }),
     }),
   })
