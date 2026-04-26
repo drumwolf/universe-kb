@@ -17,6 +17,7 @@ export default function ChatPanel() {
   const [input, setInput] = useState('')
   const bottomRef = useRef<HTMLDivElement>(null)
   const conversationId = useRef<string | null>(null)
+  const textareaRef = useRef<HTMLTextAreaElement>(null)
 
   useEffect(() => {
     const stored = localStorage.getItem('conversationId')
@@ -99,15 +100,34 @@ export default function ChatPanel() {
           if (!input.trim() || status !== 'ready') return
           sendMessage({ text: input })
           setInput('')
+          if (textareaRef.current) textareaRef.current.style.height = 'auto'
         }}
         className="flex gap-2 border-t border-zinc-800 p-4"
       >
-        <input
+        <textarea
+          ref={textareaRef}
           value={input}
-          onChange={e => setInput(e.target.value)}
+          onChange={e => {
+            setInput(e.target.value)
+            const el = textareaRef.current
+            if (el) {
+              el.style.height = 'auto'
+              el.style.height = `${el.scrollHeight}px`
+            }
+          }}
+          onKeyDown={e => {
+            if (e.key === 'Enter' && !e.shiftKey) {
+              e.preventDefault()
+              if (!input.trim() || status !== 'ready') return
+              sendMessage({ text: input })
+              setInput('')
+              if (textareaRef.current) textareaRef.current.style.height = 'auto'
+            }
+          }}
           disabled={status !== 'ready'}
           placeholder="Ask about your documents…"
-          className="flex-1 rounded bg-zinc-200 px-3 py-2 text-sm text-zinc-800 placeholder-zinc-400 outline-none focus:ring-1 focus:ring-zinc-600 disabled:opacity-40"
+          rows={1}
+          className="flex-1 resize-none rounded bg-zinc-200 px-3 py-2 text-sm text-zinc-800 placeholder-zinc-400 outline-none focus:ring-1 focus:ring-zinc-600 disabled:opacity-40"
         />
         <button
           type="submit"
