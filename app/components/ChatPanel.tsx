@@ -2,6 +2,7 @@
 
 import { DefaultChatTransport, isTextUIPart } from 'ai'
 import { useEffect, useRef, useState } from 'react'
+import ReactMarkdown from 'react-markdown'
 
 import { useChat } from '@ai-sdk/react'
 
@@ -74,9 +75,9 @@ export default function ChatPanel() {
               }`}
             >
               {message.parts.filter(isTextUIPart).map((part, i) => (
-                <p key={i} className="whitespace-pre-wrap">
-                  {part.text}
-                </p>
+                <div key={i} className="prose prose-invert prose-sm max-w-none">
+                  <ReactMarkdown>{part.text}</ReactMarkdown>
+                </div>
               ))}
             </div>
           </div>
