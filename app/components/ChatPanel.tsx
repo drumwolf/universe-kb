@@ -55,45 +55,47 @@ export default function ChatPanel() {
   return (
     <div className="flex flex-1 flex-col overflow-hidden">
       {/* Messages */}
-      <div className="flex-1 overflow-y-auto p-4 space-y-4">
-        {messages.length === 0 && (
-          <p className="mt-8 text-center text-sm">
-            Upload a document, then ask a question.
-          </p>
-        )}
+      <div className="flex-1 overflow-y-auto">
+        <div className="w-[800px] mx-auto p-4 space-y-4">
+          {messages.length === 0 && (
+            <p className="mt-8 text-center text-sm">
+              Upload a document, then ask a question.
+            </p>
+          )}
 
-        {messages.map(message => (
-          <div
-            key={message.id}
-            className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}
-          >
+          {messages.map(message => (
             <div
-              className={`max-w-[80%] rounded-lg px-4 py-2.5 text-sm leading-relaxed ${
-                message.role === 'user'
-                  ? 'bg-zinc-700 text-zinc-100 font-mono'
-                  : 'font-serif'
-              }`}
+              key={message.id}
+              className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}
             >
-              {message.parts.filter(isTextUIPart).map((part, i) => (
-                <div key={i} className={`prose prose-sm max-w-none ${
-                  message.role === 'user' ? 'prose-invert text-md' : 'text-[16px]'
-                }`}>
-                  <ReactMarkdown>{part.text}</ReactMarkdown>
-                </div>
-              ))}
+              <div
+                className={`rounded-lg px-4 py-2.5 text-sm leading-relaxed ${
+                  message.role === 'user'
+                    ? 'bg-zinc-700 text-zinc-100 font-mono max-w-[80%]'
+                    : 'font-serif'
+                }`}
+              >
+                {message.parts.filter(isTextUIPart).map((part, i) => (
+                  <div key={i} className={`prose prose-sm max-w-none ${
+                    message.role === 'user' ? 'prose-invert text-md' : 'text-[16px]'
+                  }`}>
+                    <ReactMarkdown>{part.text}</ReactMarkdown>
+                  </div>
+                ))}
+              </div>
             </div>
-          </div>
-        ))}
+          ))}
 
-        {status === 'submitted' && (
-          <div className="flex justify-start">
-            <div className="rounded-lg bg-zinc-800 px-4 py-2.5 text-sm text-zinc-500">
-              Thinking…
+          {status === 'submitted' && (
+            <div className="flex justify-start">
+              <div className="rounded-lg bg-zinc-800 px-4 py-2.5 text-sm text-zinc-500">
+                Thinking…
+              </div>
             </div>
-          </div>
-        )}
+          )}
 
-        <div ref={bottomRef} />
+          <div ref={bottomRef} />
+        </div>
       </div>
 
       {/* Input */}
