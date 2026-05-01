@@ -1,12 +1,17 @@
 'use client'
 
 import { DefaultChatTransport, isTextUIPart } from 'ai'
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef } from 'react'
+import { useState } from 'react'
 
 import ReactMarkdown from 'react-markdown'
 import { useChat } from '@ai-sdk/react'
+import { useConversation } from '@/app/context/conversation'
 
 export default function ChatPanel() {
+  const { activeId, setActiveId, refreshList } = useConversation()
+  const conversationId = useRef<string | null>(null)
+
   const { messages, sendMessage, status, setMessages } = useChat({
     transport: new DefaultChatTransport({
       api: '/api/chat',
@@ -17,15 +22,15 @@ export default function ChatPanel() {
   })
   const [input, setInput] = useState('')
   const bottomRef = useRef<HTMLDivElement>(null)
-  const conversationId = useRef<string | null>(null)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
 
   useEffect(() => {
-    const stored = localStorage.getItem('conversationId')
+    const controller = new AbortController()
 
-    const load = (id: string) => {
-      conversationId.current = id
-      fetch(`/api/conversations/${id}/messages`)
+    if (activeId) {
+      conversationId.current = activeId
+      setMessages([])
+      fetch(`/api/conversations/${activeId}/messages`, { signal: controller.signal })
         .then(r => r.json())
         .then(rows => {
           setMessages(rows.map((row: { id: string; role: string; content: string }) => ({
@@ -34,19 +39,20 @@ export default function ChatPanel() {
             parts: [{ type: 'text' as const, text: row.content }],
           })))
         })
-    }
-
-    if (stored) {
-      load(stored)
+        .catch(e => { if (e.name !== 'AbortError') console.error(e) })
     } else {
-      fetch('/api/conversations', { method: 'POST' })
+      fetch('/api/conversations', { method: 'POST', signal: controller.signal })
         .then(r => r.json())
         .then(data => {
-          localStorage.setItem('conversationId', data.id)
           conversationId.current = data.id
+          setActiveId(data.id)
+          refreshList()
         })
+        .catch(e => { if (e.name !== 'AbortError') console.error(e) })
     }
-  }, [])
+
+    return () => controller.abort()
+  }, [activeId])
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' })

@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import { useConversation } from '@/app/context/conversation'
 
 type Convo = {
   id: string
@@ -21,11 +22,14 @@ function formatDate(dateStr: string): string {
 }
 
 export default function ConversationList() {
+  const { activeId, setActiveId, listRefreshKey } = useConversation()
   const [conversations, setConversations] = useState<Convo[]>([])
+  const [deleting, setDeleting] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
     const controller = new AbortController()
+    setError(null)
     fetch('/api/conversations', { signal: controller.signal })
       .then(r => {
         if (!r.ok) throw new Error(`Failed to load conversations (${r.status})`)
@@ -34,7 +38,18 @@ export default function ConversationList() {
       .then(setConversations)
       .catch(e => { if (e.name !== 'AbortError') setError(e.message) })
     return () => controller.abort()
-  }, [])
+  }, [listRefreshKey])
+
+  async function handleDelete(id: string) {
+    setDeleting(id)
+    try {
+      await fetch(`/api/conversations/${id}`, { method: 'DELETE' })
+      setConversations(prev => prev.filter(c => c.id !== id))
+      if (id === activeId || conversations.length === 1) setActiveId(null)
+    } finally {
+      setDeleting(null)
+    }
+  }
 
   if (error) {
     return <p className="text-xs text-red-400">{error}</p>
@@ -49,7 +64,10 @@ export default function ConversationList() {
       {conversations.map(convo => (
         <li
           key={convo.id}
-          className="flex items-start justify-between gap-2 rounded bg-zinc-900 px-3 py-2"
+          onClick={() => setActiveId(convo.id)}
+          className={`flex cursor-pointer items-start justify-between gap-2 rounded px-3 py-2 transition-colors ${
+            convo.id === activeId ? 'bg-zinc-700' : 'bg-zinc-900 hover:bg-zinc-800'
+          }`}
         >
           <div className="min-w-0 flex-1">
             <p className="truncate text-xs font-medium text-zinc-200" title={convo.title || 'Untitled'}>
@@ -59,14 +77,14 @@ export default function ConversationList() {
               {formatDate(convo.created_at)}
             </p>
           </div>
-          {/* <button
-            onClick={() => handleDelete(doc.id)}
-            disabled={deleting === doc.id}
-            aria-label={`Delete ${convo.name}`}
+          <button
+            onClick={e => { e.stopPropagation(); handleDelete(convo.id) }}
+            disabled={deleting === convo.id}
+            aria-label={`Delete ${convo.title || 'conversation'}`}
             className="mt-0.5 shrink-0 transition-colors hover:text-red-400 disabled:opacity-40"
           >
             ×
-          </button> */}
+          </button>
         </li>
       ))}
     </ul>
