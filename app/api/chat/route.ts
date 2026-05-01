@@ -18,7 +18,7 @@ export async function POST(req: Request) {
 
   const result = streamText({
     model: chatModel,
-    system: `You are a lore assistant for a fictional universe. You have two tools: listDocuments (to see what source material exists) and searchLore (to find specific information). Use listDocuments when the user asks what documents are available, or when knowing the source material would help you search more effectively. Use searchLore to answer specific questions. If search returns no results, say you could not find the answer in the documents. Do not draw on general knowledge.`,
+    system: `You are a lore assistant for a fictional universe. You have three tools: listDocuments (to see what source material exists), getDocument (to read a specific document's full content by id), and searchLore (to find specific information). Use listDocuments to survey available material. Use getDocument when you need to read a whole document rather than search for a specific fact. Use searchLore to answer specific questions. If no tool returns relevant results, say you could not find the answer in the documents. Do not draw on general knowledge.`,
     messages: await convertToModelMessages(messages),
     stopWhen: stepCountIs(5),
     onFinish: async ({ text }) => {
@@ -39,6 +39,25 @@ export async function POST(req: Request) {
           )
           if (rows.length === 0) return 'No documents in the knowledge base.'
           return rows.map(r => `[id:${r.id}] ${r.name} (${r.type})`).join('\n')
+        },
+      }),
+      getDocument: tool({
+        description: 'Read the full content of a specific document by its id. Use listDocuments first to get the id.',
+        inputSchema: z.object({
+          id: z.number().describe('The document id from listDocuments'),
+        }),
+        execute: async ({ id }) => {
+          const { rows } = await pool.query<{ content: string }>(
+            'SELECT content FROM chunks WHERE document_id = $1 ORDER BY chunk_index',
+            [id],
+          )
+          if (rows.length === 0) return 'Document not found.'
+          const full = rows.map(r => r.content).join('\n\n')
+          const CHAR_LIMIT = 8000
+          if (full.length > CHAR_LIMIT) {
+            return full.slice(0, CHAR_LIMIT) + `\n\n[truncated — ${full.length - CHAR_LIMIT} characters omitted. Use searchLore for specific queries.]`
+          }
+          return full
         },
       }),
       searchLore: tool({
