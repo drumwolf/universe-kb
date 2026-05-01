@@ -18,7 +18,7 @@ export async function POST(req: Request) {
 
   const result = streamText({
     model: chatModel,
-    system: `You are a lore assistant for a fictional universe. Use the searchLore tool to find relevant information before answering. If the tool returns no results, say you could not find the answer in the documents. Do not draw on general knowledge.`,
+    system: `You are a lore assistant for a fictional universe. You have two tools: listDocuments (to see what source material exists) and searchLore (to find specific information). Use listDocuments when the user asks what documents are available, or when knowing the source material would help you search more effectively. Use searchLore to answer specific questions. If search returns no results, say you could not find the answer in the documents. Do not draw on general knowledge.`,
     messages: await convertToModelMessages(messages),
     stopWhen: stepCountIs(5),
     onFinish: async ({ text }) => {
@@ -30,6 +30,17 @@ export async function POST(req: Request) {
       )
     },
     tools: {
+      listDocuments: tool({
+        description: 'List all documents in the knowledge base. Use this to see what source material is available before searching.',
+        inputSchema: z.object({}),
+        execute: async () => {
+          const { rows } = await pool.query<{ id: number; name: string; type: string }>(
+            'SELECT id, name, type FROM documents ORDER BY name',
+          )
+          if (rows.length === 0) return 'No documents in the knowledge base.'
+          return rows.map(r => `[id:${r.id}] ${r.name} (${r.type})`).join('\n')
+        },
+      }),
       searchLore: tool({
         description: 'Search the lore knowledge base for information relevant to the query.',
         inputSchema: z.object({
