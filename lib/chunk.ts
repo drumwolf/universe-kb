@@ -1,5 +1,6 @@
 const CHUNK_SIZE = 800
 const CHUNK_OVERLAP = 150
+const MIN_CHUNK_SIZE = 50
 
 export function chunkText(text: string): string[] {
   const cleaned = text
@@ -46,6 +47,5 @@ export function chunkText(text: string): string[] {
     }
     i = Math.max(i + 1, next)
   }
-
-  return chunks
+  return chunks.filter(c => c.length >= MIN_CHUNK_SIZE)
 }
