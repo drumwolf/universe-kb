@@ -5,6 +5,7 @@ export function chunkText(text: string): string[] {
   const cleaned = text
     .replace(/^--\s*\d+\s*of\s*\d+\s*--$/gim, '')
     .replace(/\n{3,}/g, '\n\n')
+    .replace(/([^\n])\n([^\n])/g, '$1 $2')
     .trim()
 
   // Break into atomic pieces: paragraphs, subdivided by sentence if too long
