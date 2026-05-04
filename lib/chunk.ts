@@ -34,6 +34,8 @@ export function chunkText(text: string): string[] {
 
     chunks.push(buf)
 
+    if (j >= pieces.length) break
+
     // Back up from j to include ~CHUNK_OVERLAP chars in the next chunk
     let overlapChars = 0
     let next = j
