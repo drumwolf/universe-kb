@@ -1,36 +1,46 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# universe-kb
+
+A RAG (Retrieval-Augmented Generation) app for storing and querying fictional universe lore. Modeled on Claude Projects — upload documents, then ask questions about them in a chat interface backed by hybrid search and Claude.
+
+## Stack
+
+- **Next.js** — app framework
+- **PostgreSQL** — stores documents, chunks, conversations, and messages
+- **Voyage AI** — generates embeddings for semantic search
+- **pgvector** — vector similarity search
+- **Claude (Anthropic)** — answers questions using retrieved context
 
 ## Getting Started
 
-First, run the development server:
-
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000).
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+---
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Design Decisions
 
-## Learn More
+### Chunking strategy (`lib/chunk.ts`)
 
-To learn more about Next.js, take a look at the following resources:
+Documents are split into chunks before embedding. The chunking strategy matters because retrieval quality depends on chunks being the right size and capturing complete thoughts — a query can only retrieve what's in a single chunk.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+**What we tried first:** The initial implementation split on blank lines and merged short paragraphs until they hit a minimum length. This accidentally produced page-sized chunks because PDF conversion inserted `-- X of Y --` page markers surrounded by blank lines, making each page a single chunk. Page boundaries are layout artifacts, not semantic boundaries — a page break can fall mid-sentence or mid-argument.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+**What we do now:** Recursive splitting with overlap.
 
-## Deploy on Vercel
+1. Strip PDF artifacts (`-- X of Y --` markers, single-newline line-wrap artifacts)
+2. Split the full document on paragraph breaks
+3. Any paragraph still over 800 characters gets subdivided at sentence boundaries
+4. Pieces are greedily merged into chunks up to 800 characters
+5. Each chunk overlaps the next by ~150 characters, so thoughts near a boundary appear in both chunks rather than being lost
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+**Why overlap matters:** Without it, a query about something that happens to fall at a chunk boundary might match neither chunk cleanly. Overlap is a cheap way to hedge against arbitrary split points.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+**Key parameters:**
+- `CHUNK_SIZE = 800` — roughly 120–150 words, a good unit for retrieval
+- `CHUNK_OVERLAP = 150` — ~18% overlap, standard for RAG pipelines
+- `MIN_CHUNK_SIZE = 50` — filters out near-empty chunks that would produce low-signal embeddings
+
+**Known limitation:** The sentence splitter uses `.!?` as boundary signals, which breaks on abbreviations (`Mr.`, `U.S.A.`) and decimals. This only triggers on paragraphs over 800 characters, which is rare in narrative prose, so it's deferred.
