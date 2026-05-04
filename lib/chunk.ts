@@ -1,27 +1,47 @@
-const MIN_CHUNK_LENGTH = 100
+const CHUNK_SIZE = 800
+const CHUNK_OVERLAP = 150
 
 export function chunkText(text: string): string[] {
-  const cleaned = text.replace(/^--\s*\d+\s*of\s*\d+\s*--$/gim, '').replace(/\n{3,}/g, '\n\n')
+  const cleaned = text
+    .replace(/^--\s*\d+\s*of\s*\d+\s*--$/gim, '')
+    .replace(/\n{3,}/g, '\n\n')
+    .trim()
 
-  const paragraphs = cleaned
-    .split(/\n\s*\n/)
-    .map((p) => p.trim())
-    .filter((p) => p.length > 0)
+  // Break into atomic pieces: paragraphs, subdivided by sentence if too long
+  const pieces = cleaned
+    .split(/\n\n+/)
+    .flatMap(para => {
+      const p = para.trim()
+      return p.length > CHUNK_SIZE ? (p.match(/[^.!?]+[.!?]+\s*/g) ?? [p]) : [p]
+    })
+    .map(p => p.trim())
+    .filter(Boolean)
 
-  // Merge short paragraphs into the next one so we don't embed fragments
   const chunks: string[] = []
-  let buffer = ''
+  let i = 0
 
-  for (const paragraph of paragraphs) {
-    buffer = buffer ? `${buffer}\n\n${paragraph}` : paragraph
-    if (buffer.length >= MIN_CHUNK_LENGTH) {
-      chunks.push(buffer)
-      buffer = ''
+  while (i < pieces.length) {
+    let buf = ''
+    let j = i
+
+    while (j < pieces.length) {
+      const sep = buf ? '\n\n' : ''
+      if (buf.length + sep.length + pieces[j].length > CHUNK_SIZE && buf) break
+      buf += sep + pieces[j]
+      j++
     }
-  }
+    if (!buf) { buf = pieces[j]; j++ } // single piece that exceeds CHUNK_SIZE
 
-  if (buffer) {
-    chunks.push(buffer)
+    chunks.push(buf)
+
+    // Back up from j to include ~CHUNK_OVERLAP chars in the next chunk
+    let overlapChars = 0
+    let next = j
+    while (next > i + 1 && overlapChars < CHUNK_OVERLAP) {
+      next--
+      overlapChars += pieces[next].length
+    }
+    i = Math.max(i + 1, next)
   }
 
   return chunks
