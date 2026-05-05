@@ -22,7 +22,7 @@ function formatDate(dateStr: string): string {
 }
 
 export default function ConversationList() {
-  const { activeId, setActiveId, listRefreshKey } = useConversation()
+  const { activeId, setActiveId, listRefreshKey, refreshList } = useConversation()
   const [conversations, setConversations] = useState<Convo[]>([])
   const [deleting, setDeleting] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
@@ -44,8 +44,8 @@ export default function ConversationList() {
     setDeleting(id)
     try {
       await fetch(`/api/conversations/${id}`, { method: 'DELETE' })
-      setConversations(prev => prev.filter(c => c.id !== id))
-      if (id === activeId || conversations.length === 1) setActiveId(null)
+      if (id === activeId) setActiveId(null)
+      refreshList()
     } finally {
       setDeleting(null)
     }
