@@ -43,7 +43,8 @@ export default function ConversationList() {
   async function handleDelete(id: string) {
     setDeleting(id)
     try {
-      await fetch(`/api/conversations/${id}`, { method: 'DELETE' })
+      const r = await fetch(`/api/conversations/${id}`, { method: 'DELETE' })
+      if (!r.ok) throw new Error(`Failed to delete conversation (${r.status})`)
       if (id === activeId) setActiveId(null)
       refreshList()
     } finally {

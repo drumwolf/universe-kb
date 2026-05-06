@@ -5,7 +5,6 @@ export async function DELETE(
   { params }: { params: Promise<{ id: string }> },
 ) {
   const { id } = await params
-  await pool.query('DELETE FROM messages WHERE conversation_id = $1', [id])
   const { rowCount } = await pool.query('DELETE FROM conversations WHERE id = $1', [id])
 
   if (rowCount === 0) {

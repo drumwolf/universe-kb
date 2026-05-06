@@ -1,6 +1,6 @@
 'use client'
 
-import { createContext, useContext, useState } from 'react'
+import { createContext, useCallback, useContext, useState } from 'react'
 
 type ConversationContextValue = {
   activeId: string | null
@@ -31,7 +31,7 @@ export function ConversationProvider({ children }: { children: React.ReactNode }
         activeId,
         setActiveId,
         listRefreshKey,
-        refreshList: () => setListRefreshKey(k => k + 1),
+        refreshList: useCallback(() => setListRefreshKey(k => k + 1), []),
       }}
     >
       {children}

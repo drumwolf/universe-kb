@@ -31,7 +31,10 @@ export default function ChatPanel() {
       conversationId.current = activeId
       setMessages([])
       fetch(`/api/conversations/${activeId}/messages`, { signal: controller.signal })
-        .then(r => r.json())
+        .then(r => {
+          if (!r.ok) throw new Error(`Failed to load messages (${r.status})`)
+          return r.json()
+        })
         .then(rows => {
           setMessages(rows.map((row: { id: string; role: string; content: string }) => ({
             id: row.id,
