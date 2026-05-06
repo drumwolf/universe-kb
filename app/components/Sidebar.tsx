@@ -1,8 +1,9 @@
 'use client'
 
-import { useState } from 'react'
-import UploadForm from './UploadForm'
+import ConversationList from './ConversationList'
 import DocumentList from './DocumentList'
+import UploadForm from './UploadForm'
+import { useState } from 'react'
 
 export default function Sidebar() {
   const [refreshKey, setRefreshKey] = useState(0)
@@ -23,6 +24,13 @@ export default function Sidebar() {
           Documents
         </h2>
         <DocumentList refreshKey={refreshKey} />
+      </section>
+
+      <section className="flex flex-col gap-3">
+        <h2 className="text-xs font-medium uppercase tracking-wider text-zinc-500">
+          Chats
+        </h2>
+        <ConversationList />
       </section>
     </aside>
   )
