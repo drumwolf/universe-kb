@@ -1,8 +1,7 @@
 'use client'
 
 import { DefaultChatTransport, isTextUIPart } from 'ai'
-import { useEffect, useRef } from 'react'
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 
 import ReactMarkdown from 'react-markdown'
 import { useChat } from '@ai-sdk/react'
