@@ -52,7 +52,7 @@ export async function POST(req: Request) {
         description: 'List all documents in the knowledge base. Use this to see what source material is available before searching.',
         inputSchema: z.object({}),
         execute: async () => {
-          const { rows } = await pool.query<{ id: number; name: string; type: string }>(
+          const { rows } = await pool.query<{ id: string; name: string; type: string }>(
             'SELECT id, name, type FROM documents ORDER BY name',
           )
           if (rows.length === 0) return 'No documents in the knowledge base.'
@@ -62,7 +62,7 @@ export async function POST(req: Request) {
       getDocument: tool({
         description: 'Read the full content of a specific document by its id. Use listDocuments first to get the id.',
         inputSchema: z.object({
-          id: z.number().describe('The document id from listDocuments'),
+          id: z.string().describe('The document id from listDocuments'),
         }),
         execute: async ({ id }) => {
           const { rows } = await pool.query<{ content: string }>(
