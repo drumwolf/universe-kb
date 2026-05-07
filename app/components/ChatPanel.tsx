@@ -18,6 +18,7 @@ export default function ChatPanel() {
         body: { ...body, messages, conversationId: conversationId.current },
       }),
     }),
+    onFinish: () => refreshList(),
   })
   const [input, setInput] = useState('')
   const bottomRef = useRef<HTMLDivElement>(null)
