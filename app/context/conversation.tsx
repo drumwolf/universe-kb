@@ -1,6 +1,6 @@
 'use client'
 
-import { createContext, useCallback, useContext, useState } from 'react'
+import { createContext, useCallback, useContext, useEffect, useState } from 'react'
 
 type ConversationContextValue = {
   activeId: string | null
@@ -14,9 +14,12 @@ const ConversationContext = createContext<ConversationContextValue | null>(null)
 const STORAGE_KEY = 'conversationId'
 
 export function ConversationProvider({ children }: { children: React.ReactNode }) {
-  const [activeId, setActiveIdState] = useState<string | null>(() =>
-    typeof window !== 'undefined' ? localStorage.getItem(STORAGE_KEY) : null
-  )
+  const [activeId, setActiveIdState] = useState<string | null>(null)
+
+  useEffect(() => {
+    const stored = localStorage.getItem(STORAGE_KEY)
+    if (stored) setActiveIdState(stored)
+  }, [])
   const [listRefreshKey, setListRefreshKey] = useState(0)
 
   function setActiveId(id: string | null) {
