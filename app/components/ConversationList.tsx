@@ -20,7 +20,7 @@ function formatDate(dateStr: string): string {
   return dateFormatter.format(new Date(dateStr))
 }
 
-export default function ConversationList() {
+export default function ConversationList({ refreshKey }: { refreshKey: number }) {
   const [conversations, setConversations] = useState<Convo[]>([])
   const [deleting, setDeleting] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
@@ -38,7 +38,7 @@ export default function ConversationList() {
           setError(e instanceof Error ? e.message : 'Failed to load conversations')
       })
     return () => controller.abort()
-  }, [])
+  }, [refreshKey])
 
   async function handleDelete(id: string) {
     setDeleting(id)

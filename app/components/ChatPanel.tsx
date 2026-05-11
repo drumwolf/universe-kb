@@ -6,7 +6,7 @@ import { useEffect, useRef, useState } from 'react'
 import ReactMarkdown from 'react-markdown'
 import { useChat } from '@ai-sdk/react'
 
-export default function ChatPanel() {
+export default function ChatPanel({ onNewConversation }: { onNewConversation: () => void }) {
   const { messages, sendMessage, status, setMessages } = useChat({
     transport: new DefaultChatTransport({
       api: '/api/chat',
@@ -23,31 +23,34 @@ export default function ChatPanel() {
   useEffect(() => {
     const stored = localStorage.getItem('conversationId')
 
-    const load = (id: string) => {
-      conversationId.current = id
-      fetch(`/api/conversations/${id}/messages`)
+    const createNew = () => {
+      fetch('/api/conversations', { method: 'POST' })
+        .then(r => r.json())
+        .then(data => {
+          localStorage.setItem('conversationId', data.id)
+          conversationId.current = data.id
+          onNewConversation()
+        })
+    }
+
+    if (stored) {
+      conversationId.current = stored
+      fetch(`/api/conversations/${stored}/messages`)
         .then(r => {
+          if (r.status === 404) { localStorage.removeItem('conversationId'); createNew(); return null }
           if (!r.ok) throw new Error(`Failed to load messages (${r.status})`)
           return r.json()
         })
         .then(rows => {
+          if (!rows) return
           setMessages(rows.map((row: { id: string; role: string; content: string }) => ({
             id: row.id,
             role: row.role,
             parts: [{ type: 'text' as const, text: row.content }],
           })))
         })
-    }
-
-    if (stored) {
-      load(stored)
     } else {
-      fetch('/api/conversations', { method: 'POST' })
-        .then(r => r.json())
-        .then(data => {
-          localStorage.setItem('conversationId', data.id)
-          conversationId.current = data.id
-        })
+      createNew()
     }
   }, [])
 
