@@ -44,10 +44,10 @@ export default function Sidebar({
           </button>
         </div>
         <ConversationList
-            refreshKey={convoRefreshKey}
-            activeConversationId={activeConversationId}
-            onSelectConversation={onSelectConversation}
-          />
+          refreshKey={convoRefreshKey}
+          activeConversationId={activeConversationId}
+          onSelectConversation={onSelectConversation}
+        />
       </section>
     </aside>
   )
