@@ -5,7 +5,15 @@ import ConversationList from './ConversationList'
 import UploadForm from './UploadForm'
 import DocumentList from './DocumentList'
 
-export default function Sidebar({ convoRefreshKey }: { convoRefreshKey: number }) {
+export default function Sidebar({
+  convoRefreshKey,
+  activeConversationId,
+  onSelectConversation,
+}: {
+  convoRefreshKey: number
+  activeConversationId: string | null
+  onSelectConversation: (id: string | null) => void
+}) {
   const [docRefreshKey, setDocRefreshKey] = useState(0)
 
   return (
@@ -30,7 +38,11 @@ export default function Sidebar({ convoRefreshKey }: { convoRefreshKey: number }
         <h2 className="text-xs font-medium uppercase tracking-wider text-zinc-500">
           Chats
         </h2>
-        <ConversationList refreshKey={convoRefreshKey} />
+        <ConversationList
+            refreshKey={convoRefreshKey}
+            activeConversationId={activeConversationId}
+            onSelectConversation={onSelectConversation}
+          />
       </section>
     </aside>
   )

@@ -6,7 +6,13 @@ import { useEffect, useRef, useState } from 'react'
 import ReactMarkdown from 'react-markdown'
 import { useChat } from '@ai-sdk/react'
 
-export default function ChatPanel({ onNewConversation }: { onNewConversation: () => void }) {
+export default function ChatPanel({
+  activeConversationId,
+  onConversationCreated,
+}: {
+  activeConversationId: string | null | undefined
+  onConversationCreated: (id: string) => void
+}) {
   const { messages, sendMessage, status, setMessages } = useChat({
     transport: new DefaultChatTransport({
       api: '/api/chat',
@@ -21,23 +27,26 @@ export default function ChatPanel({ onNewConversation }: { onNewConversation: ()
   const textareaRef = useRef<HTMLTextAreaElement>(null)
 
   useEffect(() => {
-    const stored = localStorage.getItem('conversationId')
+    if (activeConversationId === undefined) return
 
-    const createNew = () => {
-      fetch('/api/conversations', { method: 'POST' })
+    const controller = new AbortController()
+
+    if (activeConversationId === null) {
+      fetch('/api/conversations', { method: 'POST', signal: controller.signal })
         .then(r => r.json())
-        .then(data => {
-          localStorage.setItem('conversationId', data.id)
-          conversationId.current = data.id
-          onNewConversation()
-        })
-    }
-
-    if (stored) {
-      conversationId.current = stored
-      fetch(`/api/conversations/${stored}/messages`)
+        .then(data => onConversationCreated(data.id))
+        .catch(e => { if (e.name !== 'AbortError') console.error(e) })
+    } else {
+      conversationId.current = activeConversationId
+      setMessages([])
+      fetch(`/api/conversations/${activeConversationId}/messages`, { signal: controller.signal })
         .then(r => {
-          if (r.status === 404) { localStorage.removeItem('conversationId'); createNew(); return null }
+          if (r.status === 404) {
+            fetch('/api/conversations', { method: 'POST' })
+              .then(r => r.json())
+              .then(data => onConversationCreated(data.id))
+            return null
+          }
           if (!r.ok) throw new Error(`Failed to load messages (${r.status})`)
           return r.json()
         })
@@ -49,10 +58,11 @@ export default function ChatPanel({ onNewConversation }: { onNewConversation: ()
             parts: [{ type: 'text' as const, text: row.content }],
           })))
         })
-    } else {
-      createNew()
+        .catch(e => { if (e.name !== 'AbortError') console.error(e) })
     }
-  }, [])
+
+    return () => controller.abort()
+  }, [activeConversationId])
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' })

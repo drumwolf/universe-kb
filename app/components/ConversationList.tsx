@@ -20,7 +20,15 @@ function formatDate(dateStr: string): string {
   return dateFormatter.format(new Date(dateStr))
 }
 
-export default function ConversationList({ refreshKey }: { refreshKey: number }) {
+export default function ConversationList({
+  refreshKey,
+  activeConversationId,
+  onSelectConversation,
+}: {
+  refreshKey: number
+  activeConversationId: string | null
+  onSelectConversation: (id: string | null) => void
+}) {
   const [conversations, setConversations] = useState<Convo[]>([])
   const [deleting, setDeleting] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
@@ -47,6 +55,7 @@ export default function ConversationList({ refreshKey }: { refreshKey: number })
       const r = await fetch(`/api/conversations/${id}`, { method: 'DELETE' })
       if (!r.ok) throw new Error(`Failed to delete conversation (${r.status})`)
       setConversations(prev => prev.filter(c => c.id !== id))
+      if (id === activeConversationId) onSelectConversation(null)
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Failed to delete conversation')
     } finally {
@@ -61,7 +70,10 @@ export default function ConversationList({ refreshKey }: { refreshKey: number })
         {conversations.map(convo => (
           <li
             key={convo.id}
-            className='flex items-start justify-between gap-2 rounded px-3 py-2 transition-colors bg-zinc-900 hover:bg-zinc-800'
+            onClick={() => onSelectConversation(convo.id)}
+            className={`flex cursor-pointer items-start justify-between gap-2 rounded px-3 py-2 transition-colors ${
+              convo.id === activeConversationId ? 'bg-zinc-700' : 'bg-zinc-900 hover:bg-zinc-800'
+            }`}
           >
             <div className="min-w-0 flex-1">
               <p className="truncate text-xs font-medium text-zinc-200" title={convo.title || 'Untitled'}>
