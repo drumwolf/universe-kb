@@ -1,6 +1,6 @@
 'use client'
 
-import { DefaultChatTransport, getToolName, isTextUIPart, isToolUIPart } from 'ai'
+import { DefaultChatTransport, getToolName, isDataUIPart, isTextUIPart, isToolUIPart } from 'ai'
 import { useEffect, useRef, useState } from 'react'
 
 import ReactMarkdown from 'react-markdown'
@@ -104,6 +104,25 @@ export default function ChatPanel({
                     </div>
                   )
                 }
+                if (isDataUIPart(part) && part.type === 'data-citations') {
+                  const sources = part.data as Array<{ name: string; content: string }>
+                  return (
+                    <details key={i} className="mt-2 text-xs text-zinc-500">
+                      <summary className="cursor-pointer select-none hover:text-zinc-300">
+                        Sources ({sources.length})
+                      </summary>
+                      <div className="mt-1.5 space-y-2 border-l border-zinc-700 pl-3">
+                        {sources.map((s, j) => (
+                          <div key={j}>
+                            <div className="font-medium text-zinc-400">{s.name}</div>
+                            <div className="mt-0.5 line-clamp-2 text-zinc-500">{s.content}</div>
+                          </div>
+                        ))}
+                      </div>
+                    </details>
+                  )
+                }
+
                 if (isTextUIPart(part) && part.text) {
                   return (
                     <div

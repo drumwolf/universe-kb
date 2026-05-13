@@ -1,4 +1,4 @@
-import { convertToModelMessages, embed, generateText, stepCountIs, streamText, tool, UIMessage } from 'ai'
+import { convertToModelMessages, createUIMessageStream, createUIMessageStreamResponse, embed, generateText, stepCountIs, streamText, tool, UIMessage } from 'ai'
 import { anthropic } from '@ai-sdk/anthropic'
 import { voyage } from 'voyage-ai-provider'
 import pool from '@/lib/db'
@@ -16,12 +16,20 @@ export async function POST(req: Request) {
 
   const lastUserMessage = messages.findLast(m => m.role === 'user')
 
+  const citations: Array<{ name: string; content: string }> = []
+  let capturedWriter: { write: (part: any) => void } | null = null
+
   const result = streamText({
     model: chatModel,
     system: `You are a lore assistant for a fictional universe. You have three tools: listDocuments (to see what source material exists), getDocument (to read a specific document's full content by id), and searchLore (to find specific information). Use listDocuments to survey available material. Use getDocument when you need to read a whole document rather than search for a specific fact. Use searchLore to answer specific questions. If no tool returns relevant results, say you could not find the answer in the documents. Do not draw on general knowledge. Do not narrate your tool usage — go directly to the answer after using tools.`,
     messages: await convertToModelMessages(messages),
     stopWhen: stepCountIs(5),
     onFinish: async ({ text }) => {
+      if (capturedWriter && citations.length > 0) {
+        const seen = new Set<string>()
+        const deduped = citations.filter(c => seen.has(c.name) ? false : (seen.add(c.name), true))
+        capturedWriter.write({ type: 'data-citations', data: deduped })
+      }
       if (!conversationId || !lastUserMessage) return
       const userText = lastUserMessage.parts.find(p => p.type === 'text')?.text ?? ''
 
@@ -65,11 +73,14 @@ export async function POST(req: Request) {
           id: z.string().describe('The document id from listDocuments'),
         }),
         execute: async ({ id }) => {
-          const { rows } = await pool.query<{ content: string }>(
-            'SELECT content FROM chunks WHERE document_id = $1 ORDER BY chunk_index',
+          const { rows } = await pool.query<{ content: string; name: string }>(
+            `SELECT c.content, d.name FROM chunks c
+             JOIN documents d ON c.document_id = d.id
+             WHERE c.document_id = $1 ORDER BY c.chunk_index`,
             [id],
           )
           if (rows.length === 0) return 'Document not found.'
+          for (const r of rows) citations.push({ name: r.name, content: r.content })
           const full = rows.map(r => r.content).join('\n\n')
           const CHAR_LIMIT = 8000
           if (full.length > CHAR_LIMIT) {
@@ -124,11 +135,20 @@ export async function POST(req: Request) {
 
           if (rows.length === 0) return 'No relevant documents found.'
 
+          for (const r of rows) citations.push({ name: r.name, content: r.content })
+
           return rows.map(r => `[${r.name}]\n${r.content}`).join('\n\n---\n\n')
         },
       }),
     },
   })
 
-  return result.toUIMessageStreamResponse()
+  const stream = createUIMessageStream({
+    execute: ({ writer }) => {
+      capturedWriter = writer
+      writer.merge(result.toUIMessageStream())
+    },
+  })
+
+  return createUIMessageStreamResponse({ stream })
 }
