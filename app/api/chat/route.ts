@@ -1,4 +1,4 @@
-import { convertToModelMessages, embed, stepCountIs, streamText, tool, UIMessage } from 'ai'
+import { convertToModelMessages, embed, generateText, stepCountIs, streamText, tool, UIMessage } from 'ai'
 import { anthropic } from '@ai-sdk/anthropic'
 import { voyage } from 'voyage-ai-provider'
 import pool from '@/lib/db'
@@ -24,10 +24,28 @@ export async function POST(req: Request) {
     onFinish: async ({ text }) => {
       if (!conversationId || !lastUserMessage) return
       const userText = lastUserMessage.parts.find(p => p.type === 'text')?.text ?? ''
+
+      const { rows: countRows } = await pool.query(
+        'SELECT COUNT(*) AS count FROM messages WHERE conversation_id = $1',
+        [conversationId],
+      )
+      const isFirst = parseInt(countRows[0].count) === 0
+
       await pool.query(
         'INSERT INTO messages (conversation_id, role, content) VALUES ($1, $2, $3), ($1, $4, $5)',
         [conversationId, 'user', userText, 'assistant', text],
       )
+
+      if (isFirst && userText) {
+        const { text: title } = await generateText({
+          model: anthropic('claude-haiku-4-5-20251001'),
+          prompt: `Generate a short 4-6 word title for a conversation that starts with this message. Reply with only the title, no quotes, no punctuation at the end:\n\n${userText}`,
+        })
+        await pool.query(
+          'UPDATE conversations SET title = $1 WHERE id = $2',
+          [title.trim(), conversationId],
+        )
+      }
     },
     tools: {
       listDocuments: tool({

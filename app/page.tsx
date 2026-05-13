@@ -37,6 +37,7 @@ export default function Home() {
         <ChatPanel
           activeConversationId={activeConversationId}
           onConversationCreated={onConversationCreated}
+          onConversationUpdated={() => setConvoRefreshKey(k => k + 1)}
         />
       </main>
     </div>
