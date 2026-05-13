@@ -1,6 +1,6 @@
 'use client'
 
-import { DefaultChatTransport, isTextUIPart } from 'ai'
+import { DefaultChatTransport, getToolName, isTextUIPart, isToolUIPart } from 'ai'
 import { useEffect, useRef, useState } from 'react'
 
 import ReactMarkdown from 'react-markdown'
@@ -86,23 +86,44 @@ export default function ChatPanel({
           {messages.map(message => (
             <div
               key={message.id}
-              className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}
+              className={`flex flex-col ${message.role === 'user' ? 'items-end' : 'items-start'}`}
             >
-              <div
-                className={`rounded-lg px-4 py-2.5 text-sm leading-relaxed ${
-                  message.role === 'user'
-                    ? 'bg-zinc-700 text-zinc-100 font-mono max-w-[80%]'
-                    : 'font-serif'
-                }`}
-              >
-                {message.parts.filter(isTextUIPart).map((part, i) => (
-                  <div key={i} className={`prose prose-sm max-w-none ${
-                    message.role === 'user' ? 'prose-invert text-md' : 'text-[16px]'
-                  }`}>
-                    <ReactMarkdown>{part.text}</ReactMarkdown>
-                  </div>
-                ))}
-              </div>
+              {message.parts.map((part, i) => {
+                if (isToolUIPart(part)) {
+                  const name = getToolName(part)
+                  const done = part.state === 'output-available'
+                  const label = name === 'searchLore'
+                    ? `Searching lore${(part as any).input?.query ? ` for "${(part as any).input.query}"` : ''}…`
+                    : name === 'getDocument'
+                    ? 'Reading document…'
+                    : 'Listing documents…'
+                  return (
+                    <div key={i} className="flex items-center gap-1.5 py-0.5 text-xs text-zinc-500 italic">
+                      {!done && <span className="inline-block h-1.5 w-1.5 rounded-full bg-zinc-500 animate-pulse" />}
+                      {done ? '✓' : label}
+                    </div>
+                  )
+                }
+                if (isTextUIPart(part) && part.text) {
+                  return (
+                    <div
+                      key={i}
+                      className={`rounded-lg px-4 py-2.5 text-sm leading-relaxed ${
+                        message.role === 'user'
+                          ? 'bg-zinc-700 text-zinc-100 font-mono max-w-[80%]'
+                          : 'font-serif'
+                      }`}
+                    >
+                      <div className={`prose prose-sm max-w-none ${
+                        message.role === 'user' ? 'prose-invert text-md' : 'text-[16px]'
+                      }`}>
+                        <ReactMarkdown>{part.text}</ReactMarkdown>
+                      </div>
+                    </div>
+                  )
+                }
+                return null
+              })}
             </div>
           ))}
 

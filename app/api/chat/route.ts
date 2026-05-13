@@ -18,7 +18,7 @@ export async function POST(req: Request) {
 
   const result = streamText({
     model: chatModel,
-    system: `You are a lore assistant for a fictional universe. You have three tools: listDocuments (to see what source material exists), getDocument (to read a specific document's full content by id), and searchLore (to find specific information). Use listDocuments to survey available material. Use getDocument when you need to read a whole document rather than search for a specific fact. Use searchLore to answer specific questions. If no tool returns relevant results, say you could not find the answer in the documents. Do not draw on general knowledge.`,
+    system: `You are a lore assistant for a fictional universe. You have three tools: listDocuments (to see what source material exists), getDocument (to read a specific document's full content by id), and searchLore (to find specific information). Use listDocuments to survey available material. Use getDocument when you need to read a whole document rather than search for a specific fact. Use searchLore to answer specific questions. If no tool returns relevant results, say you could not find the answer in the documents. Do not draw on general knowledge. Do not narrate your tool usage — go directly to the answer after using tools.`,
     messages: await convertToModelMessages(messages),
     stopWhen: stepCountIs(5),
     onFinish: async ({ text }) => {
