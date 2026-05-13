@@ -9,11 +9,14 @@ import { useChat } from '@ai-sdk/react'
 export default function ChatPanel({
   activeConversationId,
   onConversationCreated,
+  onConversationUpdated,
 }: {
   activeConversationId: string | null | undefined
   onConversationCreated: (id: string) => void
+  onConversationUpdated: () => void
 }) {
-  const { messages, sendMessage, status, setMessages } = useChat({
+  const { messages, sendMessage, status, setMessages, stop } = useChat({
+    onFinish: () => onConversationUpdated(),
     transport: new DefaultChatTransport({
       api: '/api/chat',
       prepareSendMessagesRequest: ({ messages, body }) => ({
@@ -29,6 +32,7 @@ export default function ChatPanel({
   useEffect(() => {
     if (activeConversationId === undefined) return
 
+    stop()
     const controller = new AbortController()
 
     if (activeConversationId === null) {

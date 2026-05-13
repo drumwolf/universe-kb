@@ -35,14 +35,22 @@ export default function Sidebar({
       </section>
 
       <section className="flex flex-col gap-3">
-        <h2 className="text-xs font-medium uppercase tracking-wider text-zinc-500">
-          Chats
-        </h2>
+        <div className="flex items-center justify-between">
+          <h2 className="text-xs font-medium uppercase tracking-wider text-zinc-500">
+            Chats
+          </h2>
+          <button
+            className="cursor-pointer text-xs text-zinc-400 transition-colors hover:text-zinc-100"
+            onClick={() => onSelectConversation(null)}
+          >
+            + New
+          </button>
+        </div>
         <ConversationList
-            refreshKey={convoRefreshKey}
-            activeConversationId={activeConversationId}
-            onSelectConversation={onSelectConversation}
-          />
+          refreshKey={convoRefreshKey}
+          activeConversationId={activeConversationId}
+          onSelectConversation={onSelectConversation}
+        />
       </section>
     </aside>
   )

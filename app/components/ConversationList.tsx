@@ -83,14 +83,16 @@ export default function ConversationList({
                 {formatDate(convo.created_at)}
               </p>
             </div>
-            <button
-              onClick={e => { e.stopPropagation(); handleDelete(convo.id) }}
-              disabled={deleting === convo.id}
-              aria-label={`Delete ${convo.title || 'conversation'}`}
-              className="cursor-pointer mt-0.5 shrink-0 transition-colors hover:text-red-400 disabled:opacity-40"
-            >
-              ×
-            </button>
+            {convo.id !== activeConversationId && (
+              <button
+                onClick={e => { e.stopPropagation(); handleDelete(convo.id) }}
+                disabled={deleting === convo.id}
+                aria-label={`Delete ${convo.title || 'conversation'}`}
+                className="cursor-pointer mt-0.5 shrink-0 transition-colors hover:text-red-400 disabled:opacity-40"
+              >
+                ×
+              </button>
+            )}
           </li>
         ))}
       </ul>
