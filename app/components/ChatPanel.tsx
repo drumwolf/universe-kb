@@ -1,6 +1,6 @@
 'use client'
 
-import { DefaultChatTransport, isTextUIPart } from 'ai'
+import { DefaultChatTransport, getToolName, isDataUIPart, isTextUIPart, isToolUIPart } from 'ai'
 import { useEffect, useRef, useState } from 'react'
 
 import ReactMarkdown from 'react-markdown'
@@ -86,23 +86,63 @@ export default function ChatPanel({
           {messages.map(message => (
             <div
               key={message.id}
-              className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}
+              className={`flex flex-col ${message.role === 'user' ? 'items-end' : 'items-start'}`}
             >
-              <div
-                className={`rounded-lg px-4 py-2.5 text-sm leading-relaxed ${
-                  message.role === 'user'
-                    ? 'bg-zinc-700 text-zinc-100 font-mono max-w-[80%]'
-                    : 'font-serif'
-                }`}
-              >
-                {message.parts.filter(isTextUIPart).map((part, i) => (
-                  <div key={i} className={`prose prose-sm max-w-none ${
-                    message.role === 'user' ? 'prose-invert text-md' : 'text-[16px]'
-                  }`}>
-                    <ReactMarkdown>{part.text}</ReactMarkdown>
-                  </div>
-                ))}
-              </div>
+              {message.parts.map((part, i) => {
+                if (isToolUIPart(part)) {
+                  const name = getToolName(part)
+                  const done = part.state === 'output-available'
+                  const label = name === 'searchLore'
+                    ? `Searching lore${(part as any).input?.query ? ` for "${(part as any).input.query}"` : ''}…`
+                    : name === 'getDocument'
+                    ? 'Reading document…'
+                    : 'Listing documents…'
+                  return (
+                    <div key={i} className="flex items-center gap-1.5 py-0.5 text-xs text-zinc-500 italic">
+                      {!done && <span className="inline-block h-1.5 w-1.5 rounded-full bg-zinc-500 animate-pulse" />}
+                      {done ? '✓' : label}
+                    </div>
+                  )
+                }
+                if (isDataUIPart(part) && part.type === 'data-citations') {
+                  const sources = part.data as Array<{ name: string; content: string }>
+                  return (
+                    <details key={i} className="mt-2 text-xs text-zinc-500">
+                      <summary className="cursor-pointer select-none hover:text-zinc-300">
+                        Sources ({sources.length})
+                      </summary>
+                      <div className="mt-1.5 space-y-2 border-l border-zinc-700 pl-3">
+                        {sources.map((s, j) => (
+                          <div key={j}>
+                            <div className="font-medium text-zinc-400">{s.name}</div>
+                            <div className="mt-0.5 line-clamp-2 text-zinc-500">{s.content}</div>
+                          </div>
+                        ))}
+                      </div>
+                    </details>
+                  )
+                }
+
+                if (isTextUIPart(part) && part.text) {
+                  return (
+                    <div
+                      key={i}
+                      className={`rounded-lg px-4 py-2.5 text-sm leading-relaxed ${
+                        message.role === 'user'
+                          ? 'bg-zinc-700 text-zinc-100 font-mono max-w-[80%]'
+                          : 'font-serif'
+                      }`}
+                    >
+                      <div className={`prose prose-sm max-w-none ${
+                        message.role === 'user' ? 'prose-invert text-md' : 'text-[16px]'
+                      }`}>
+                        <ReactMarkdown>{part.text}</ReactMarkdown>
+                      </div>
+                    </div>
+                  )
+                }
+                return null
+              })}
             </div>
           ))}
 
