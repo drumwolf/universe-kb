@@ -78,9 +78,29 @@ export default function ChatPanel({
       <div className="flex-1 overflow-y-auto">
         <div className="w-[800px] mx-auto p-4 space-y-4">
           {messages.length === 0 && (
-            <p className="mt-8 text-center text-sm">
-              Upload a document, then ask a question.
-            </p>
+            <div className="mt-16 flex flex-col items-center gap-6 text-center">
+              <div>
+                <h2 className="text-lg font-semibold text-zinc-100">universe-kb</h2>
+                <p className="mt-2 text-sm text-zinc-400 max-w-sm">
+                  An agentic RAG app for fictional universe lore. Upload documents, then ask questions — Claude searches your knowledge base and answers strictly from what you&apos;ve uploaded.
+                </p>
+              </div>
+              <div className="flex flex-col gap-2 w-full max-w-sm">
+                {[
+                  'What documents have been uploaded?',
+                  'Who are the main characters?',
+                  'What are the major factions in this universe?',
+                ].map(q => (
+                  <button
+                    key={q}
+                    onClick={() => setInput(q)}
+                    className="rounded border border-zinc-700 px-4 py-2.5 text-sm text-zinc-300 transition-colors hover:border-zinc-500 hover:text-zinc-100 text-left"
+                  >
+                    {q}
+                  </button>
+                ))}
+              </div>
+            </div>
           )}
 
           {messages.map(message => (
