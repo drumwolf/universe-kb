@@ -80,7 +80,7 @@ export default function ChatPanel({
           {messages.length === 0 && (
             <div className="mt-16 flex flex-col items-center gap-6 text-center">
               <div>
-                <h2 className="text-lg font-semibold text-zinc-100">universe-kb</h2>
+                <h2 className="text-lg font-semibold text-zinc-800">universe-kb</h2>
                 <p className="mt-2 text-sm text-zinc-400 max-w-sm">
                   An agentic RAG app for fictional universe lore. Upload documents, then ask questions — Claude searches your knowledge base and answers strictly from what you&apos;ve uploaded.
                 </p>
