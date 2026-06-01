@@ -7,6 +7,7 @@ import Sidebar from '@/app/components/Sidebar'
 export default function Home() {
   const [convoRefreshKey, setConvoRefreshKey] = useState(0)
   const [activeConversationId, setActiveConversationId] = useState<string | null | undefined>(undefined)
+  const [mode, setMode] = useState<'qa' | 'generate'>('qa')
 
   useEffect(() => {
     const stored = localStorage.getItem('conversationId')
@@ -30,6 +31,8 @@ export default function Home() {
         convoRefreshKey={convoRefreshKey}
         activeConversationId={activeConversationId ?? null}
         onSelectConversation={selectConversation}
+        mode={mode}
+        onModeChange={setMode}
       />
 
       {/* Right panel — chat */}
@@ -38,6 +41,7 @@ export default function Home() {
           activeConversationId={activeConversationId}
           onConversationCreated={onConversationCreated}
           onConversationUpdated={() => setConvoRefreshKey(k => k + 1)}
+          mode={mode}
         />
       </main>
     </div>
