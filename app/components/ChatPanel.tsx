@@ -22,7 +22,7 @@ export default function ChatPanel({
     transport: new DefaultChatTransport({
       api: '/api/chat',
       prepareSendMessagesRequest: ({ messages, body }) => ({
-        body: { ...body, messages, conversationId: conversationId.current },
+        body: { ...body, messages, conversationId: conversationId.current, mode },
       }),
     }),
   })

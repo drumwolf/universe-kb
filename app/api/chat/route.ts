@@ -12,7 +12,7 @@ const embeddingModel = voyage.textEmbeddingModel('voyage-3')
 const TOP_K = 5
 
 export async function POST(req: Request) {
-  const { messages, conversationId }: { messages: UIMessage[]; conversationId: string } = await req.json()
+  const { messages, conversationId, mode }: { messages: UIMessage[]; conversationId: string; mode: 'qa' | 'generate' } = await req.json()
 
   const lastUserMessage = messages.findLast(m => m.role === 'user')
 
