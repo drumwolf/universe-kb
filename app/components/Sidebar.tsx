@@ -19,6 +19,9 @@ export default function Sidebar({
   return (
     <aside className="flex w-72 flex-col gap-6 border-r border-zinc-800 p-5">
       <h1 className="text-base font-semibold tracking-tight">universe-kb</h1>
+      <p className="text-xs leading-relaxed text-zinc-400">
+        A knowledge base for fictional universe lore. Upload documents and ask questions in natural language — answers are grounded strictly in what you&apos;ve uploaded.
+      </p>
 
       <section className="flex flex-col gap-3">
         <h2 className="text-xs font-medium uppercase tracking-wider text-zinc-500">
