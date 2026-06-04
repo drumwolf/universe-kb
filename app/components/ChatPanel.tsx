@@ -10,24 +10,29 @@ export default function ChatPanel({
   activeConversationId,
   onConversationCreated,
   onConversationUpdated,
+  mode,
 }: {
   activeConversationId: string | null | undefined
   onConversationCreated: (id: string) => void
   onConversationUpdated: () => void
+  mode: 'qa' | 'generate'
 }) {
   const { messages, sendMessage, status, setMessages, stop } = useChat({
     onFinish: () => onConversationUpdated(),
     transport: new DefaultChatTransport({
       api: '/api/chat',
       prepareSendMessagesRequest: ({ messages, body }) => ({
-        body: { ...body, messages, conversationId: conversationId.current },
+        body: { ...body, messages, conversationId: conversationId.current, mode: modeRef.current },
       }),
     }),
   })
   const [input, setInput] = useState('')
   const bottomRef = useRef<HTMLDivElement>(null)
   const conversationId = useRef<string | null>(null)
+  const modeRef = useRef(mode)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
+
+  useEffect(() => { modeRef.current = mode }, [mode])
 
   useEffect(() => {
     if (activeConversationId === undefined) return
@@ -86,11 +91,15 @@ export default function ChatPanel({
                 </p>
               </div>
               <div className="flex flex-col gap-2 w-full max-w-sm">
-                {[
+                {(mode === 'qa' ? [
                   'What documents have been uploaded?',
                   'Who are the main characters?',
                   'What are the major factions in this universe?',
-                ].map(q => (
+                ] : [
+                  'Create a new character consistent with the existing lore',
+                  'Write a description for a new location in this universe',
+                  'Generate a faction that fits the established world',
+                ]).map(q => (
                   <button
                     key={q}
                     onClick={() => setInput(q)}
@@ -189,6 +198,7 @@ export default function ChatPanel({
         }}
         className="flex gap-2 border-t border-zinc-800 p-4"
       >
+
         <textarea
           ref={textareaRef}
           value={input}
@@ -210,7 +220,7 @@ export default function ChatPanel({
             }
           }}
           disabled={status !== 'ready'}
-          placeholder="Ask about your documents…"
+          placeholder={mode === 'qa' ? 'Ask about your documents…' : 'Describe what you’d like to create…'}
           rows={1}
           className="flex-1 resize-none rounded bg-zinc-200 px-3 py-2 text-sm text-zinc-800 placeholder-zinc-400 outline-none focus:ring-1 focus:ring-zinc-600 disabled:opacity-40"
         />

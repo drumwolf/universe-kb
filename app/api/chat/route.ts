@@ -12,7 +12,7 @@ const embeddingModel = voyage.textEmbeddingModel('voyage-3')
 const TOP_K = 5
 
 export async function POST(req: Request) {
-  const { messages, conversationId }: { messages: UIMessage[]; conversationId: string } = await req.json()
+  const { messages, conversationId, mode }: { messages: UIMessage[]; conversationId: string; mode: 'qa' | 'generate' } = await req.json()
 
   const lastUserMessage = messages.findLast(m => m.role === 'user')
 
@@ -23,7 +23,9 @@ export async function POST(req: Request) {
     model: chatModel,
     system: {
       role: 'system',
-      content: `You are a lore assistant for a fictional universe. You have three tools: listDocuments (to see what source material exists), getDocument (to read a specific document's full content by id), and searchLore (to find specific information). Use listDocuments to survey available material. Use getDocument when you need to read a whole document rather than search for a specific fact. Use searchLore to answer specific questions. If no tool returns relevant results, say you could not find the answer in the documents. Do not draw on general knowledge. Do not narrate your tool usage — go directly to the answer after using tools.`,
+      content: mode === 'generate'
+        ? `You are a creative writing assistant for a fictional universe. You have three tools: listDocuments (to see what source material exists), getDocument (to read a specific document's full content by id), and searchLore (to find relevant lore). Use these tools to ground yourself in the established universe — its tone, style, existing characters, factions, and world rules. Then use your general knowledge and creative abilities to generate, speculate, or infer. When the documents do not contain a specific answer, commit to the most plausible response using general knowledge and what the documents establish about the character or world. Never say you cannot determine something because it is not in the documents — that is Q&A mode behavior. In generate mode, you always provide a specific, confident answer grounded in context and general knowledge. Do not narrate your tool usage — go directly to the response after using tools.`
+        : `You are a lore assistant for a fictional universe. You have three tools: listDocuments (to see what source material exists), getDocument (to read a specific document's full content by id), and searchLore (to find specific information). Use listDocuments to survey available material. Use getDocument when you need to read a whole document rather than search for a specific fact. Use searchLore to answer specific questions. If no tool returns relevant results, say you could not find the answer in the documents. Do not draw on general knowledge. Do not narrate your tool usage — go directly to the answer after using tools.`,
       providerOptions: { anthropic: { cacheControl: { type: 'ephemeral' } } },
     },
     messages: await convertToModelMessages(messages),
