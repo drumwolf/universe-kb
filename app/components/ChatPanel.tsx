@@ -22,14 +22,17 @@ export default function ChatPanel({
     transport: new DefaultChatTransport({
       api: '/api/chat',
       prepareSendMessagesRequest: ({ messages, body }) => ({
-        body: { ...body, messages, conversationId: conversationId.current, mode },
+        body: { ...body, messages, conversationId: conversationId.current, mode: modeRef.current },
       }),
     }),
   })
   const [input, setInput] = useState('')
   const bottomRef = useRef<HTMLDivElement>(null)
   const conversationId = useRef<string | null>(null)
+  const modeRef = useRef(mode)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
+
+  useEffect(() => { modeRef.current = mode }, [mode])
 
   useEffect(() => {
     if (activeConversationId === undefined) return
