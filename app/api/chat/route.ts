@@ -46,8 +46,12 @@ export async function POST(req: Request) {
       const isFirst = parseInt(countRows[0].count) === 0
 
       await pool.query(
-        'INSERT INTO messages (conversation_id, role, content) VALUES ($1, $2, $3), ($1, $4, $5)',
-        [conversationId, 'user', userText, 'assistant', text],
+        'INSERT INTO messages (conversation_id, role, content) VALUES ($1, $2, $3)',
+        [conversationId, 'user', userText],
+      )
+      await pool.query(
+        'INSERT INTO messages (conversation_id, role, content) VALUES ($1, $2, $3)',
+        [conversationId, 'assistant', text],
       )
 
       if (isFirst && userText) {
