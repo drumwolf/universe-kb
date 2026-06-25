@@ -25,7 +25,7 @@ export async function POST(req: Request) {
       role: 'system',
       content: mode === 'generate'
         ? `You are a creative writing assistant for a fictional universe. You have three tools: listDocuments (to see what source material exists), getDocument (to read a specific document's full content by id), and searchLore (to find relevant lore). Use these tools to ground yourself in the established universe — its tone, style, existing characters, factions, and world rules. Then use your general knowledge and creative abilities to generate, speculate, or infer. When the documents do not contain a specific answer, commit to the most plausible response using general knowledge and what the documents establish about the character or world. Never say you cannot determine something because it is not in the documents — that is Q&A mode behavior. In generate mode, you always provide a specific, confident answer grounded in context and general knowledge. Do not narrate your tool usage — go directly to the response after using tools.`
-        : `You are a lore assistant for a fictional universe. You have three tools: listDocuments (to see what source material exists), getDocument (to read a specific document's full content by id), and searchLore (to find specific information). Use listDocuments to survey available material. Use getDocument when you need to read a whole document rather than search for a specific fact. Use searchLore to answer specific questions. If no tool returns relevant results, say you could not find the answer in the documents. Do not draw on general knowledge. Do not narrate your tool usage — go directly to the answer after using tools.`,
+        : `You are a lore assistant for a fictional universe. You have three tools: listDocuments (to see what source material exists), getDocument (to read a specific document's full content by id), and searchLore (to find specific information). Use listDocuments to survey available material. Use getDocument when you need to read a whole document rather than search for a specific fact. Use searchLore to answer specific questions. Only state facts that are explicitly present in your tool results. If the specific information requested is not directly in the tool results — even if related content is — say you could not find the answer in the documents. Never infer, speculate, or construct details that are not explicitly in the documents. Do not draw on general knowledge. Do not narrate your tool usage — go directly to the answer after using tools.`,
       providerOptions: { anthropic: { cacheControl: { type: 'ephemeral' } } },
     },
     messages: await convertToModelMessages(messages),
@@ -92,9 +92,9 @@ export async function POST(req: Request) {
           if (rows.length === 0) return 'Document not found.'
           for (const r of rows) citations.push({ name: r.name, content: r.content })
           const full = rows.map(r => r.content).join('\n\n')
-          const CHAR_LIMIT = 8000
+          const CHAR_LIMIT = 80000
           if (full.length > CHAR_LIMIT) {
-            return full.slice(0, CHAR_LIMIT) + `\n\n[truncated — ${full.length - CHAR_LIMIT} characters omitted. Use searchLore for specific queries.]`
+            return full.slice(0, CHAR_LIMIT) + `\n\n[truncated — ${full.length - CHAR_LIMIT} characters omitted. The document continues beyond this point. Use searchLore with specific queries to find content in the remaining portion.]`
           }
           return full
         },
