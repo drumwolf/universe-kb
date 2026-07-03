@@ -2,7 +2,13 @@
 
 A RAG (Retrieval-Augmented Generation) app for storing and querying fictional universe lore. Upload documents, ask questions in natural language, and get answers grounded strictly in what you uploaded — no hallucinated general knowledge.
 
-Modeled on Claude Projects. Built as a learning vehicle for agentic AI architecture.
+Modeled on Claude Projects. Built as a learning vehicle for agentic AI architecture. Developed using an AI-assisted workflow with Claude Code.
+
+**Live demo:** https://universe-kb.vercel.app
+
+**Two modes:**
+- **Q&A** — strict grounding; Claude only states facts explicitly present in the documents
+- **Generate** — creative mode; Claude uses the documents as a foundation but can speculate, infer, and expand beyond what's written
 
 ## Stack
 
